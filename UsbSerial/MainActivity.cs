@@ -3,6 +3,7 @@ using Android.Content;
 using Android.Hardware.Usb;
 using Android.OS;
 using Android.Runtime;
+using Android.Widget;
 using AndroidX.AppCompat.App;
 using Hoho.Android.UsbSerial.Driver;
 using Hoho.Android.UsbSerial.Extensions;
@@ -23,6 +24,7 @@ namespace UsbSerial
         UsbSerialPort selectedPort;
         List<UsbSerialPort> portList;
         SerialInputOutputManager serialIoManager;
+        TextView dumpTextView;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -31,7 +33,8 @@ namespace UsbSerial
             SetContentView(Resource.Layout.activity_main);
 
             usbManager = GetSystemService(Context.UsbService) as UsbManager;
-            
+            dumpTextView = FindViewById<TextView>(Resource.Id.consoleText);
+
         }
         protected override async void OnResume()
         {
@@ -74,7 +77,9 @@ namespace UsbSerial
 
         void UpdateReceivedData(byte[] data)
         {
-
+            var message = "Read " + data.Length + " bytes: \n"
+                + HexDump.DumpHexString(data) + "\n\n";
+            dumpTextView.Append(message);
         }
         async Task PopulateListAsync()
         {
