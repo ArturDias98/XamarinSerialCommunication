@@ -25,6 +25,7 @@ namespace UsbSerial
         List<UsbSerialPort> portList;
         SerialInputOutputManager serialIoManager;
         TextView dumpTextView;
+        Protocol protocol;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -34,6 +35,9 @@ namespace UsbSerial
 
             usbManager = GetSystemService(Context.UsbService) as UsbManager;
             dumpTextView = FindViewById<TextView>(Resource.Id.consoleText);
+
+            protocol = new Protocol(0xAB, 0xCD, 0xAF, 0xCF, 2);
+            protocol.OnDataFromatedEvent += OnDataFormatted;
 
         }
         protected override async void OnResume()
@@ -46,6 +50,10 @@ namespace UsbSerial
         async Task Connect()
         {
             selectedPort = portList.FirstOrDefault();
+            if (selectedPort == null)
+            {
+                return;
+            }
             var permission = await usbManager.RequestPermissionAsync(selectedPort.Driver.Device, this);
             if (permission)
             {
@@ -77,9 +85,14 @@ namespace UsbSerial
 
         void UpdateReceivedData(byte[] data)
         {
-            var message = "Read " + data.Length + " bytes: \n"
+            protocol.Add(data);
+            /*var message = "Read " + data.Length + " bytes: \n"
                 + HexDump.DumpHexString(data) + "\n\n";
-            dumpTextView.Append(message);
+            dumpTextView.Append(message);*/
+        }
+        private void OnDataFormatted(double data)
+        {          
+            dumpTextView.Text = data.ToString();    
         }
         async Task PopulateListAsync()
         {

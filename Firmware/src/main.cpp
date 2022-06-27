@@ -12,11 +12,13 @@ void loop() {
 
   uint8_t lsb = analogData & 0xFF;
   uint8_t msb = (analogData >> 8) & 0xFF;
-
+  
   Serial.write(0xAB);
+  Serial.write(0xCD);
   Serial.write(lsb);
   Serial.write(msb);
-  Serial.write(0xCD);
+  Serial.write(0xAF);
+  Serial.write(0xCF);
 
-  delay(50);
+  delay(10);
 }
